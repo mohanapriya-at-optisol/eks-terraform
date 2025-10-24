@@ -60,7 +60,7 @@ terraform-eks/
 
 ├── app-efs.yaml             
 
-└── setup-backend-fixed.sh  
+└── setup-backend.sh  
 
 **envs/dev.tfvars** – Stores environment-specific variables like region, cluster name, and node settings.
 
@@ -104,9 +104,9 @@ aws sts get-caller-identity --profile tf-admin  # Verify credentials
 
 **2. Run Bootstrap Script**
 
-./setup-backend-fixed.sh --environment dev --region ap-south-1 --profile tf-admin
+./setup-backend.sh --environment dev --region ap-south-1 --profile tf-admin
 
-./setup-backend-fixed.sh --environment test --region ap-south-1 --profile tf-admin
+./setup-backend.sh --environment test --region ap-south-1 --profile tf-admin
 
 **3. Review Config**
 
@@ -157,3 +157,45 @@ kubectl get pods -n kube-system
 kubectl delete -f app-efs.yaml
 
 terraform destroy -var-file="envs/dev.tfvars"
+
+**GitHub Actions CI/CD for Terraform**
+
+This project also supports automated deployment using GitHub Actions. You don’t need to manually run Terraform on your machine — the workflow handles it for you.
+
+What the GitHub Actions Workflow Does
+
+Automatically validates, plans, and applies Terraform infrastructure changes.
+
+Uses environment variables stored as GitHub Secrets to securely provide AWS credentials and configuration.
+
+Ensures Terraform state is stored safely in an S3 bucket and locked with DynamoDB (prevents conflicts when multiple runs happen simultaneously).
+
+Deploys your EKS cluster, worker nodes, Karpenter, Load Balancer Controller, and EFS storage automatically.
+
+Summarizes Terraform outputs in GitHub Actions UI for easy review.
+
+**Prerequisites**
+
+1. GitHub Repository: Your Terraform code must be pushed to a GitHub repository.
+
+
+2.GitHub Secrets: Store sensitive data securely: AWS_DEFAULT_REGION, AWS_ACCESS_KEY, AWS_SECRET_ACCESS_KEY, AWS_ACCOUNT_ID
+
+3.Self-hosted Runner: A Linux or Windows or Mac machine connected as a self-hosted runner to execute workflows.
+
+**🚀 How the Workflow Works**
+
+The CI-BUILD Workflow will  be executed on very commit on the repo. This is detech the file chnages in the last commit and overwrites or checkout that files in the self hosted runner.
+
+Once the checkout has been the current directory where the code exist will be displayed in the pipeline logs. Move to the directory and perform these actions.
+
+chmod +x setup-backend.sh
+
+./setup-backend.sh --environment dev --region ap-south-1 --profile tf-admin
+
+This script on nearing the completion will trigger the the deploy.yml script which will perform the validate, plan and apply actions for terraform.
+
+
+
+
+
