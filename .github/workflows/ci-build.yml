@@ -5,6 +5,7 @@ on:
     branches:
       - main  # change this to your branch if needed
 
+
 jobs:
   update-committed-file:
     runs-on: [self-hosted, linux, x64]
